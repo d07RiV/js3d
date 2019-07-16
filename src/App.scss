@@ -1,0 +1,24 @@
+.App {
+  margin: 1em;
+}
+.Canvas {
+  display: inline-block;
+  position: relative;
+  border: 1px solid #ccc;
+  vertical-align: top;
+}
+.Perf {
+  list-style-type: none;
+  //position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: monospace;
+}
+.Config {
+  display: inline-block;
+  margin: 1em;
+  vertical-align: top;
+}
+.indented {
+  margin-left: 1em;
+}

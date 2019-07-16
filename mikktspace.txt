@@ -1,0 +1,43 @@
+
+1. Count triangles. Each quad is two triangles.
+2. Generate vertex index list
+  pTriInfos <- triangle info (face number, TSpace offset, vert_num)
+  piTriList <- face/vertex indices for triangles
+  Quads are split long the shortest diagonal, first in t.coords then in position (strict equality)
+3. Merge identical vertices in piTriList
+4. Count degenerate triangles (strict equality in position)
+  Set MARK_DEGENERATE flag
+5. For each quad, if one tri is degenerate, mark both as QUAD_ONE_DEGEN_TRI
+6. Move good tris to start, without changing order
+7. For each triangle
+ v1, v2, v3, t1, t2, t3
+ d1 = v2 - v1
+ d2 = v3 - v1
+ t21 = t2 - t1
+ t31 = t3 - t1
+ area = [t21,t31]
+ vOs = d1 * t31.y - d2 * t21.y
+ vOt = -d1 * t31.x + d2 * t21.x
+ set ORIENT_PRESERVING if area > 0
+ if area is not 0 (approx)
+   absArea = abs(area)
+   fLenOs = len(vOs)
+   fLenOt = len(vOt)
+   fS = sign(area)
+   if fLenOs is not 0 (approx)
+     vOs = vOs * fS / fLenOs
+   if fLenOt is not 0 (approx)
+     vOt = vOt * fS / fLenOt
+   fMagS = fLenOs / absArea
+   fMagT = fLenOt / absArea
+   if fMagS is not 0 and fMagT is not 0 (approx)
+     remove GROUP_WITH_ANY
+8. Force ORIENT_PRESERVING to be the same on quads (choose tri with larger area as correct)
+9. Build FaceNeighbors (same indices, in reverse)
+10. Build vertex groups
+  Group triangles with same ORIENT_PRESERVING
+  If GROUP_WITH_ANY flag is set, group with first candidate, and set ORIENT_PRESERVING flag for the whole triangle on first grouping
+11. For each group
+  average projected vOs, vOt
+  weighted by angle between projected edge vectors
+  ignore GROUP_WITH_ANY tris

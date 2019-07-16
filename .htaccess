@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^\w+$ index.html [L]
