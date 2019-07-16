@@ -11,15 +11,15 @@ import RenderNode from 'graphics/renderNode';
 import Mesh from 'graphics/mesh';
 import * as WebGL from 'graphics/constants';
 
-const X0 = -5, Y0 = -5, X1 = 5;
-const oX0 = -20, oX1 = 20, oY0 = -10, oY1 = 10;
+const X0 = -5, Y0 = -8, X1 = 5;
+const oX0 = -20, oX1 = 20, oY0 = -10, oY1 = 15;
 
 const eps = 0, eps1 = 1 - eps * 2;
 
 const maxDropped = 100;
 
 const BoardX = X0, BoardW = X1 - X0;
-const BoardY = Y0, BoardH = 12;
+const BoardY = Y0, BoardH = 20;
 
 const SlowSpeed = 2 / 1000, FastSpeed = 20 / 1000;
 const difficulty = score => score / 2000 + 1;
@@ -33,9 +33,18 @@ const Colors = [
   [0,1,1],
   [1,0,1],
   [0.7,0.7,0.7],
+  [0, 0, 0],
 ];
 let Materials = null;
 let roundBox = null;
+
+const GameOver = [
+  " ###  ##  #   # ####      ##  #  # #### ### ",
+  "#    #  # ## ## #        #  # #  # #    #  #",
+  "#  # #### # # # ###      #  # #  # ###  ### ",
+  "#  # #  # #   # #        #  #  # # #    #  #",
+  " ##  #  # #   # ####      ##    ## #### #  #"
+];
 
 const Pieces = [
   [[0,0], [1,0], [2,0], [3,0]],
@@ -287,7 +296,7 @@ class GameState {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
-    0, 0, 20, 1
+    0, 0, 28, 1
   ));
   
   constructor(canvas, root) {
@@ -341,7 +350,7 @@ class GameState {
     light.shadow = this.shadow;
     light.minAngle = 60;
     light.maxAngle = 120;
-    this.bigLight.translation = vec3.fromValues(0, 0, 8);
+    this.bigLight.translation = vec3.fromValues(0, 0, 12);
     this.bigLight.rotation = quat.create();
 
     document.addEventListener("keydown", this.onKeyDown, true);
@@ -351,11 +360,31 @@ class GameState {
     root.appendChild(this.scoreDiv);
     this.scoreDiv.innerText = "Score: 0";
 
-    this.gameOverDiv = document.createElement("div");
-    this.gameOverDiv.className = "gameOver";
-    root.appendChild(this.gameOverDiv);
-    this.gameOverDiv.innerText = "Game Over";
-    this.gameOverDiv.style.display = "none";
+    const goMaterial = new renderer.Material().setColor(1, 0, 0);
+    vec3.set(goMaterial.emissiveFactor, 0.4, 0, 0);
+    goMaterial.metallicFactor = 0;
+    goMaterial.roughnessFactor = 0;
+    const goBlock = new Mesh('box', [roundBox.clone(goMaterial)]);
+    const go = this.gameOverNode = new RenderNode();
+    for (let y = 0; y < GameOver.length; ++y) {
+      for (let x = 0; x < GameOver[y].length; ++x) {
+        if (GameOver[y][x] === '#') {
+          const node = new RenderNode();
+          node.mesh = goBlock;
+          node.translation = vec3.fromValues(x, GameOver.length - y - 1, 0);
+          node.scale = vec3.fromValues(0.5 - eps, 0.5 - eps, 0.5 - eps);
+          go.addChild(node);
+        }
+      }
+    }
+    go.scale = vec3.fromValues(0.25, 0.25, 0.25);
+    go.translation = vec3.fromValues(-GameOver[0].length * 0.125, -GameOver.length * 0.125, 2);
+
+    //this.gameOverDiv = document.createElement("div");
+    //this.gameOverDiv.className = "gameOver";
+    //root.appendChild(this.gameOverDiv);
+    //this.gameOverDiv.innerText = "Game Over";
+    //this.gameOverDiv.style.display = "none";
   }
 
   update(time) {
@@ -382,7 +411,8 @@ class GameState {
         this.curPiece = null;
         if (!this.board.addPiece(index, x, stopY, rotation)) {
           this.gameOver = true;
-          this.gameOverDiv.style.display = "block";
+          this.scene.addChild(this.gameOverNode);
+          //this.gameOverDiv.style.display = "block";
           vec3.set(this.bigLight.light.color, 1, 0, 0);
         } else {
           const full = this.board.fullRows();
@@ -435,7 +465,8 @@ class GameState {
         this.gameOver = false;
         this.score = 0;
         this.scoreDiv.innerText = "Score: 0";
-        this.gameOverDiv.style.display = "none";
+        this.scene.removeChild(this.gameOverNode);
+        //this.gameOverDiv.style.display = "none";
         vec3.set(this.bigLight.light.color, 0.7, 0.7, 0.7);
         this.board.reset();
       }
