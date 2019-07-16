@@ -12,7 +12,7 @@ import Mesh from 'graphics/mesh';
 import * as WebGL from 'graphics/constants';
 
 const X0 = -5, Y0 = -8, X1 = 5;
-const oX0 = -20, oX1 = 20, oY0 = -10, oY1 = 15;
+const oX0 = -20, oX1 = 20, oY0 = -10, oY1 = 12, oY2 = 20;
 
 const eps = 0, eps1 = 1 - eps * 2;
 
@@ -325,6 +325,7 @@ class GameState {
     ground.addShape(new phy.shapes.Box(oX0, Y0, 0, X0 - oX0, oY1 - Y0, 1));
     ground.addShape(new phy.shapes.Box(X1, Y0, 0, oX1 - X1, oY1 - Y0, 1));
     ground.addShape(new phy.shapes.Box(oX0, oY0, 0, oX1 - oX0, Y0 - oY0, 1));
+    ground.addShape(new phy.shapes.Box(oX0, oY1, 0, oX1 - oX0, oY2 - oY1, 1));
     const plane = new phy.shapes.Plane([0, 1, 0], Y0 - 1);
     plane.material.friction = 0.5;
     ground.addShape(plane);

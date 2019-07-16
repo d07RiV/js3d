@@ -150,7 +150,7 @@ module.exports = {
           },
           {
             test: /\.(glsl|frag|vert)$/,
-            loader: require.resolve('raw-loader'),
+            loader: require.resolve('webpack-glsl-loader')
           },
           ...customConfig.webpackLoaders,
           // "file" loader makes sure assets end up in the `build` folder.
